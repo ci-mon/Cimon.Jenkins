@@ -1,16 +1,8 @@
 ﻿using System.Threading.Tasks;
 using System;
-using System.Net.Http;
 using System.Threading;
 
 namespace Cimon.Jenkins;
-
-public interface IQuery<out TResult>
-{
-    string GetPath();
-    HttpMethod Method => HttpMethod.Get;
-    bool AddApiJsonSuffix => true;
-}
 
 public interface IJenkinsClient : IDisposable
 {

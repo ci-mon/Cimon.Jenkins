@@ -1,46 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Cimon.Jenkins.Entities.Builds;
 using Polly;
 using Polly.Extensions.Http;
 
 namespace Cimon.Jenkins;
-
-public abstract record Query<T> : IQuery<T>
-{
-    public abstract string GetPath();
-
-    
-}
-
-public class JobLocator
-{
-    private JobLocator() {
-    }
-    private string[] _path = Array.Empty<string>();
-    public static JobLocator Create(params string[] jobs) => new() {
-        _path = jobs.ToArray()
-    };
-
-    public override string ToString() {
-        return string.Join("/", _path.Select(x => $"job/{x}"));
-    }
-}
-
-public record BuildInfoQuery(string Build, JobLocator Job) : Query<BuildInfo>
-{
-    public override string GetPath() {
-        return $"{Job}/{Build}";
-    }
-}
 
 public class JenkinsClient : IJenkinsClient
 {

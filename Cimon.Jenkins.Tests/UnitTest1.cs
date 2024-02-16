@@ -1,9 +1,8 @@
-using Cimon.Jenkins.Entities.Builds;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Cimon.Jenkins.Tests;
 
-public class Tests
+public class JenkinsClientIntegrationTests
 {
 	private IJenkinsClient _jenkinsClient = null!;
 	[SetUp]
@@ -22,7 +21,8 @@ public class Tests
 	}
 
 	[Test]
-	public async Task Test1() {
+	public async Task BuildInfoQuery() {
 		var buildInfo = await _jenkinsClient.Get(new BuildInfoQuery("10", JobLocator.Create("test1", "master")));
+		Assert.NotNull(buildInfo);
 	}
 }
