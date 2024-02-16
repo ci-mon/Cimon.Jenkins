@@ -1,5 +1,5 @@
-# Narochno.Jenkins [![Build status](https://ci.appveyor.com/api/projects/status/c8f7v86cvwija07w/branch/master?svg=true)](https://ci.appveyor.com/project/Narochno/narochno-jenkins/branch/master) [![NuGet](https://img.shields.io/nuget/v/Narochno.Jenkins.svg)](https://www.nuget.org/packages/Narochno.Jenkins/)
-A simple Jenkins client, providing a C# wrapper around the default Jenkins API.
+# Cimon.Jenkins [![NuGet](https://img.shields.io/nuget/v/Cimon.Jenkins.svg)](https://www.nuget.org/packages/Cimon.Jenkins/)
+This is a fork of Narochno.Jenkins a simple Jenkins client, providing a C# wrapper around the default Jenkins API.
 
 ## Example Usage
 ```csharp

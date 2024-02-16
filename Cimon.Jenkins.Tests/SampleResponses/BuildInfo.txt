@@ -1,0 +1,150 @@
+{
+  "_class": "org.jenkinsci.plugins.workflow.job.WorkflowRun",
+  "actions": [
+    {
+      "_class": "hudson.model.CauseAction",
+      "causes": [
+        {
+          "_class": "hudson.model.Cause$UserIdCause",
+          "shortDescription": "Started by user Admin",
+          "userId": "admin",
+          "userName": "Admin"
+        }
+      ]
+    },
+    {
+      "_class": "jenkins.scm.api.SCMRevisionAction"
+    },
+    {
+      "_class": "org.jenkinsci.plugins.workflow.libs.LibrariesAction"
+    },
+    {},
+    {
+      "_class": "hudson.plugins.git.util.BuildData",
+      "buildsByBranchName": {
+        "master": {
+          "_class": "hudson.plugins.git.util.Build",
+          "buildNumber": 10,
+          "buildResult": null,
+          "marked": {
+            "SHA1": "d93f3c2c168977d7e415d0def588dac469f6a3a8",
+            "branch": [
+              {
+                "SHA1": "d93f3c2c168977d7e415d0def588dac469f6a3a8",
+                "name": "master"
+              }
+            ]
+          },
+          "revision": {
+            "SHA1": "d93f3c2c168977d7e415d0def588dac469f6a3a8",
+            "branch": [
+              {
+                "SHA1": "d93f3c2c168977d7e415d0def588dac469f6a3a8",
+                "name": "master"
+              }
+            ]
+          }
+        }
+      },
+      "lastBuiltRevision": {
+        "SHA1": "d93f3c2c168977d7e415d0def588dac469f6a3a8",
+        "branch": [
+          {
+            "SHA1": "d93f3c2c168977d7e415d0def588dac469f6a3a8",
+            "name": "master"
+          }
+        ]
+      },
+      "remoteUrls": [
+        "http://gogs:3001/root/test1.git"
+      ],
+      "scmName": ""
+    },
+    {},
+    {
+      "_class": "hudson.tasks.junit.TestResultAction",
+      "failCount": 1,
+      "skipCount": 0,
+      "totalCount": 1,
+      "urlName": "testReport"
+    },
+    {},
+    {},
+    {},
+    {
+      "_class": "org.jenkinsci.plugins.displayurlapi.actions.RunDisplayAction"
+    },
+    {
+      "_class": "org.jenkinsci.plugins.pipeline.modeldefinition.actions.RestartDeclarativePipelineAction"
+    },
+    {},
+    {
+      "_class": "org.jenkinsci.plugins.workflow.job.views.FlowGraphAction"
+    },
+    {},
+    {},
+    {},
+    {}
+  ],
+  "artifacts": [],
+  "building": false,
+  "description": null,
+  "displayName": "#10",
+  "duration": 29457,
+  "estimatedDuration": 23874,
+  "executor": null,
+  "fullDisplayName": "test1 » master #10",
+  "id": "10",
+  "keepLog": false,
+  "number": 10,
+  "queueId": 33,
+  "result": "FAILURE",
+  "timestamp": 1707664102558,
+  "url": "http://localhost:8080/job/test1/job/master/10/",
+  "changeSets": [
+    {
+      "_class": "hudson.plugins.git.GitChangeSetList",
+      "items": [
+        {
+          "_class": "hudson.plugins.git.GitChangeSet",
+          "affectedPaths": [
+            "Jenkinsfile"
+          ],
+          "commitId": "d93f3c2c168977d7e415d0def588dac469f6a3a8",
+          "timestamp": 1707664086000,
+          "author": {
+            "absoluteUrl": "http://localhost:8080/user/testUser",
+            "fullName": "testUser"
+          },
+          "authorEmail": "testUser@gmail.com",
+          "comment": "fix\n",
+          "date": "2024-02-11 17:08:06 +0200",
+          "id": "d93f3c2c168977d7e415d0def588dac469f6a3a8",
+          "msg": "fix",
+          "paths": [
+            {
+              "editType": "edit",
+              "file": "Jenkinsfile"
+            }
+          ]
+        }
+      ],
+      "kind": "git"
+    }
+  ],
+  "culprits": [
+    {
+      "absoluteUrl": "http://localhost:8080/user/testUser",
+      "fullName": "testUser"
+    }
+  ],
+  "inProgress": false,
+  "nextBuild": {
+    "number": 11,
+    "url": "http://localhost:8080/job/test1/job/master/11/"
+  },
+  "previousBuild": {
+    "number": 9,
+    "url": "http://localhost:8080/job/test1/job/master/9/"
+  }
+}
