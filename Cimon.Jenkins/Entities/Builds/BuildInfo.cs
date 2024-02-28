@@ -1,7 +1,6 @@
 ﻿using Cimon.Jenkins.Entities.Users;
 using System.Collections.Generic;
 using System.Text.Json.Nodes;
-
 namespace Cimon.Jenkins.Entities.Builds;
 
 public record BuildInfo : Build
@@ -21,5 +20,8 @@ public record BuildInfo : Build
     public string? Result { get; set; }
     public List<ChangeSet>? ChangeSets { get; set; }
     public IList<User> Culprits { get; set; } = new List<User>();
-    public JsonArray? Actions { get; set; }
+    public List<DynamicItem>? Actions { get; set; }
+    public bool InProgress { get; set; }
+    public Build NextBuild { get; set; }
+    public Build PreviousBuild { get; set; }
 }

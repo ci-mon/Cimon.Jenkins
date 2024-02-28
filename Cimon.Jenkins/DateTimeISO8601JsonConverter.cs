@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
-namespace Cimon.Jenkins.Entities.Builds;
+namespace Cimon.Jenkins;
 
 class DateTimeISO8601JsonConverter : JsonConverter<DateTime>
 {

@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Cimon.Jenkins.Entities.Users;
 using Polly;
 using Polly.Extensions.Http;
 
@@ -50,13 +51,15 @@ public class JenkinsClient : IJenkinsClient
                     }
                 });
     }
-    
+
     public async Task<TResult?> Get<TResult>(IQuery<TResult> query, CancellationToken ctx = default) {
-        var path = $"{query.GetPath()}/api/json";
-        var request = new HttpRequestMessage(query.Method, path);
-        var response = await RunWithPolicy(ctx, request);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<TResult>(ctx).ConfigureAwait(false);
+        var path = query.GetPath();
+        if (query.AddApiJsonSuffix) {
+            path = $"{path}/api/json";
+        }
+        using var request = new HttpRequestMessage(query.Method, path);
+        using var response = await RunWithPolicy(ctx, request);
+        return await query.GetResult(response, ctx).ConfigureAwait(false);
     }
 
     private async Task<HttpResponseMessage> RunWithPolicy(CancellationToken ctx, 
@@ -74,58 +77,9 @@ public class JenkinsClient : IJenkinsClient
             return response;
         }
     }
-    /*
-    public async Task<UserInfo> GetUser(string user, CancellationToken ctx = default(CancellationToken)) {
-        var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.GetAsync(jenkinsConfig.JenkinsUrl + "/user/" + user + "/api/json", ctx));
-
-        response.EnsureSuccessStatusCode();
-
-        return JsonConvert.DeserializeObject<UserInfo>(await response.Content.ReadAsStringAsync(), serializerSettings);
-    }
-
-    public async Task<ViewInfo> GetView(string view, CancellationToken ctx = default(CancellationToken))
-    {
-        var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.GetAsync(jenkinsConfig.JenkinsUrl + "/view/" + view + "/api/json", ctx));
-
-        response.EnsureSuccessStatusCode();
-
-        return JsonConvert.DeserializeObject<ViewInfo>(await response.Content.ReadAsStringAsync(), serializerSettings);
-    }
-
-    public async Task<BuildInfo> GetBuild(string job, string build, CancellationToken ctx = default(CancellationToken))
-    {
-        var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.GetAsync(jenkinsConfig.JenkinsUrl + JobPath(job) + "/" + build + "/api/json", ctx));
-
-        response.EnsureSuccessStatusCode();
-
-        return JsonConvert.DeserializeObject<BuildInfo>(await response.Content.ReadAsStringAsync(), serializerSettings);
-    }
-
-    public async Task<string> GetBuildConsole(string job, string build, CancellationToken ctx = default(CancellationToken))
-    {
-        var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.GetAsync(jenkinsConfig.JenkinsUrl + JobPath(job) + "/" + build + "/consoleText", ctx));
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadAsStringAsync();
-    }
-
-    public async Task<JobInfo> GetJob(string job, CancellationToken ctx = default(CancellationToken))
-    {
-        var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.GetAsync(jenkinsConfig.JenkinsUrl + JobPath(job) + "/api/json", ctx));
-
-        response.EnsureSuccessStatusCode();
-
-        return JsonConvert.DeserializeObject<JobInfo>(await response.Content.ReadAsStringAsync(), serializerSettings);
-    }
-
-    public async Task<Master> GetMaster(CancellationToken ctx = default(CancellationToken))
-    {
-        var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.GetAsync(jenkinsConfig.JenkinsUrl + "/api/json", ctx));
-
-        response.EnsureSuccessStatusCode();
-
-        return JsonConvert.DeserializeObject<Master>(await response.Content.ReadAsStringAsync(), serializerSettings);
-    }
-
+    
+/*
+   
     public async Task BuildProject(string job, CancellationToken ctx = default(CancellationToken))
     {
         var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.PostAsync(jenkinsConfig.JenkinsUrl + JobPath(job) + "/build", null, ctx));
@@ -179,17 +133,6 @@ public class JenkinsClient : IJenkinsClient
         return await GetRetryPolicy().ExecuteAsync(() => httpClient.GetAsync(response.Headers.Location.AbsoluteUri, ctx));
     }
 
-    public async Task<string> DownloadJobConfig(string job, CancellationToken ctx = default(CancellationToken))
-    {
-        var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.GetAsync(jenkinsConfig.JenkinsUrl + JobPath(job) + "/config.xml", ctx));
-
-        response.EnsureSuccessStatusCode();
-
-        var config = await response.Content.ReadAsStringAsync();
-
-        return config;
-    }
-
     public async Task UploadJobConfig(string job, string xml, CancellationToken ctx = default(CancellationToken))
     {
         var content = new StringContent(xml, Encoding.UTF8, "application/xml");
@@ -230,12 +173,6 @@ public class JenkinsClient : IJenkinsClient
         response = await FollowRedirect(response, ctx);
 
         response.EnsureSuccessStatusCode();
-    }
-        
-    public async Task<bool> ExistsJob(string job, CancellationToken ctx = default(CancellationToken))
-    {
-        var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.GetAsync(jenkinsConfig.JenkinsUrl + JobPath(job) + "/api/json", ctx));
-        return response.IsSuccessStatusCode;
     }
         
     public async Task CreateJob(string job, string xml, CancellationToken ctx = default(CancellationToken))
@@ -293,29 +230,7 @@ public class JenkinsClient : IJenkinsClient
     {
         await GetRetryPolicy().ExecuteAsync(() => httpClient.PostAsync(jenkinsConfig.JenkinsUrl + "/safeRestart", null, ctx));
     }
-
-    private string JobPath(string path)
-    {
-        if (string.IsNullOrEmpty(path)) return path;
-
-        if (!path.StartsWith("/")) path = "/" + path;
-        if (path.EndsWith("/")) path = path.Remove(path.Length - 1, 1);
-        //Make it possible to pass either variant:
-        //1.) URL = /job/parentfolder/job/subfolder/job/actualjob
-        //2.) Logical path = /parentfolder/subfolder/actualjob
-        //Logical path needs to be converted to the URL form (first replace).
-        //The first replace also adds the needed "/job/" if we just receive the actual job without any folders. 
-        //The second replace corrects to the original value if the parameter already was in the URL form.
-        path = path.Replace("/", "/job/").Replace("/job/job/job", "/job");
-        return path;
-    }
-
-    private RetryPolicy<HttpResponseMessage> GetRetryPolicy()
-    {
-        return Policy
-            .HandleResult<HttpResponseMessage>(r => r.StatusCode >= HttpStatusCode.InternalServerError)
-            .WaitAndRetryAsync(jenkinsConfig.RetryAttempts, retryAttempt => TimeSpan.FromSeconds(Math.Pow(jenkinsConfig.RetryBackoffExponent, retryAttempt)));
-    }*/
+*/
 
     public void Dispose() => _httpClient.Dispose();
 

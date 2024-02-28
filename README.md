@@ -3,33 +3,24 @@ This is a fork of Narochno.Jenkins a simple Jenkins client, providing a C# wrapp
 
 ## Example Usage
 ```csharp
-var config = new JenkinsConfig
-{
-    JenkinsUrl = "<your jenkins instance>"
-};
-
-# Optionally dispose
-using (var jenkinsClient = new JenkinsClient(config))
-{
-    # Get the master so we can loop all jobs
-    var master = await jenkinsClient.GetMaster();
+    using var services = new ServiceCollection().AddHttpClient().AddJenkinsClientFactory().BuildServiceProvider();
+    using var client = services.GetRequiredService<Func<JenkinsConfig, IJenkinsClient>>().Invoke(new JenkinsConfig {
+        JenkinsUrl = new Uri("http://localhost:8080/"),
+        Username = "admin",
+        ApiKey = "admin"
+    });
+    var userInfo = await client.Get(new Query.UserInfo("admin"));
+    var master = await client.Get(new Query.Master());
+    var view = await client.Get(master!.Views.First().ToQuery());
+    var jobLocator = JobLocator.Create("test1", "master");
+    var job = await client.Get(new Query.Job(jobLocator));
+    var config = await client.Get(new Query.DownloadJobConfig(jobLocator));
+    var buildInfoQuery = new Query.BuildInfo("10", jobLocator);
+    var buildInfo = await client.Get(buildInfoQuery);
+    var testReport = await client.Get(new Query.TestsReport(buildInfoQuery));
     
-    foreach (var job in master.Jobs)
-    {
-        # Grab the full job metadata, including builds
-        var jobInfo = await jenkinsClient.GetJob(job.Name);
-
-        foreach (var build in jobInfo.Builds)
-        {
-            # Get the full build information
-            var buildInfo = await jenkinsClient.GetBuild(job.Name, build.Number.ToString());
-
-            if (buildInfo.ChangeSet.Items.Count > 0)
-            {
-                # Write the first change set item to the console
-                Console.WriteLine($"Got build {buildInfo} from {buildInfo.ChangeSet.Kind} revision {buildInfo.ChangeSet.Items.FirstOrDefault()}");
-            }
-        }
-    }
-}
+    var changedFiles = buildInfo.ChangeSets.SelectMany(x => x.Items).SelectMany(x => x.Paths).Select(x => x.File);
+    var tests = testReport.Suites.SelectMany(x => x.Cases).Select(x => x.Name);
+    
+    var console = await client.Get(new Query.BuildConsole(buildInfoQuery));
 ```

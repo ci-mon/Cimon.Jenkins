@@ -2,7 +2,7 @@
 
 namespace Cimon.Jenkins.Entities.Builds;
 
-public record ChangeSet
+public record ChangeSet: BaseItem
 {
     public string? Kind { get; set; }
     public IList<ChangeSetItem> Items { get; set; } = new List<ChangeSetItem>();

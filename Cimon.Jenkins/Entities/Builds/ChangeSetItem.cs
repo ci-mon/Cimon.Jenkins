@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Cimon.Jenkins.Entities.Builds;
 
-public record ChangeSetItem
+public record ChangeSetItem: BaseItem
 {
     public string CommitId { get; set; }
     public string ShortCommitId => CommitId.Length > 8 ? CommitId.Substring(0, 8) : CommitId;

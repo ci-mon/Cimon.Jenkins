@@ -2,7 +2,7 @@
 
 namespace Cimon.Jenkins.Entities.Jobs;
 
-public record Job
+public record Job : BaseItem
 {
     public string Color { get; set; }
     public string Name { get; set; }

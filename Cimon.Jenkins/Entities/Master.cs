@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Cimon.Jenkins.Entities;
 
-public record Master
+public record Master : BaseItem
 {
     public string Mode { get; set; }
     public string NodeDescription { get; set; }
