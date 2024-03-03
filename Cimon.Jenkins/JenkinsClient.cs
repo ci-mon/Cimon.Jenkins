@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -50,14 +51,33 @@ public class JenkinsClient : IJenkinsClient
 				});
 	}
 
-	public async Task<TResult?> Get<TResult>(IQuery<TResult> query, CancellationToken ctx = default) {
+	public async Task<TResult?> Get<TResult>(Query<TResult> query, CancellationToken token = default) {
 		var path = query.GetPath();
 		if (query.AddApiJsonSuffix) {
 			path = $"{path}/api/json";
 		}
 		using var request = new HttpRequestMessage(query.Method, path);
-		using var response = await RunWithPolicy(ctx, request);
-		return await query.GetResult(response, ctx).ConfigureAwait(false);
+		using var response = await RunWithPolicy(token, request);
+		return await query.GetResult(response, token).ConfigureAwait(false);
+	}
+
+	public async Task Post(Command command, CancellationToken token = default) {
+		var path = command.GetPath();
+		using var request = new HttpRequestMessage(command.Method, path);
+		if (command.Content is { } content) {
+			request.Content = content;
+		}
+		using var response = await RunWithPolicy(token, request);
+		using var redirectedResponse = await FollowRedirect(response, token);
+		await command.Verify(redirectedResponse, token).ConfigureAwait(false);
+	}
+
+	private async Task<HttpResponseMessage> FollowRedirect(HttpResponseMessage response, CancellationToken token) {
+		if (response.StatusCode != HttpStatusCode.Redirect ||
+				response.Headers.Location?.AbsoluteUri is not {Length: > 0} url) {
+			return response;
+		}
+		return await RunWithPolicy(token, new HttpRequestMessage(HttpMethod.Get, url));
 	}
 
 	private async Task<HttpResponseMessage> RunWithPolicy(CancellationToken ctx,
@@ -77,160 +97,6 @@ public class JenkinsClient : IJenkinsClient
 			return response;
 		}
 	}
-
-	/*
-
-		public async Task BuildProject(string job, CancellationToken ctx = default(CancellationToken))
-		{
-			var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.PostAsync(jenkinsConfig.JenkinsUrl + JobPath(job) + "/build", null, ctx));
-
-			response.EnsureSuccessStatusCode();
-		}
-
-		public async Task BuildProjectWithParameters(string job, IDictionary<string, string> parameters, CancellationToken ctx = default(CancellationToken))
-		{
-			var response = await GetRetryPolicy().ExecuteAsync(() =>
-			{
-				var p = new {parameter = parameters.Select(x => new {name = x.Key, value = x.Value}).ToArray()};
-				var json = JsonConvert.SerializeObject(p);
-				var content = new FormUrlEncodedContent(new[]
-				{
-					new KeyValuePair<string, string>("json", json)
-				});
-
-				return httpClient.PostAsync(jenkinsConfig.JenkinsUrl + JobPath(job) + "/build", content, ctx);
-			});
-
-			response.EnsureSuccessStatusCode();
-		}
-
-		public async Task CopyJob(string fromJobName, string newJobName, CancellationToken ctx = default(CancellationToken))
-		{
-			await CopyJob(fromJobName, newJobName, "", ctx);
-		}
-
-		public async Task CopyJob(string fromJobName, string newJobName, string path, CancellationToken ctx = default(CancellationToken))
-		{
-			var requestUri = jenkinsConfig.JenkinsUrl + JobPath(path) + "/createItem?name=" + newJobName + "&mode=copy&from=" + fromJobName;
-			var content = new StringContent("", Encoding.UTF8, "application/xml");
-
-			HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Post, requestUri)
-			{
-				Content = content
-			};
-
-			var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.SendAsync(message, ctx));
-
-			response = await FollowRedirect(response, ctx);
-
-			response.EnsureSuccessStatusCode();
-		}
-
-		private async Task<HttpResponseMessage> FollowRedirect(HttpResponseMessage response, CancellationToken ctx)
-		{
-			if (response.StatusCode != HttpStatusCode.Redirect) return response;
-
-			return await GetRetryPolicy().ExecuteAsync(() => httpClient.GetAsync(response.Headers.Location.AbsoluteUri, ctx));
-		}
-
-		public async Task UploadJobConfig(string job, string xml, CancellationToken ctx = default(CancellationToken))
-		{
-			var content = new StringContent(xml, Encoding.UTF8, "application/xml");
-
-			var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.PostAsync(jenkinsConfig.JenkinsUrl + JobPath(job) + "/config.xml", content, ctx));
-
-			response.EnsureSuccessStatusCode();
-		}
-
-		public async Task EnableJob(string job, CancellationToken ctx = default(CancellationToken))
-		{
-			var content = new StringContent("");
-
-			var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.PostAsync(jenkinsConfig.JenkinsUrl + JobPath(job) + "/enable", content, ctx));
-
-			response = await FollowRedirect(response, ctx);
-
-			response.EnsureSuccessStatusCode();
-		}
-
-		public async Task DisableJob(string job, CancellationToken ctx = default(CancellationToken))
-		{
-			var content = new StringContent("");
-
-			var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.PostAsync(jenkinsConfig.JenkinsUrl + JobPath(job) + "/disable", content, ctx));
-
-			response = await FollowRedirect(response, ctx);
-
-			response.EnsureSuccessStatusCode();
-		}
-
-		public async Task DeleteJob(string job, CancellationToken ctx = default(CancellationToken))
-		{
-			var content = new StringContent("");
-
-			var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.PostAsync(jenkinsConfig.JenkinsUrl + JobPath(job) + "/doDelete", content, ctx));
-
-			response = await FollowRedirect(response, ctx);
-
-			response.EnsureSuccessStatusCode();
-		}
-
-		public async Task CreateJob(string job, string xml, CancellationToken ctx = default(CancellationToken))
-		{
-			await CreateJob(job, xml, "", ctx);
-		}
-
-		public async Task CreateJob(string job, string xml, string path, CancellationToken ctx = default(CancellationToken))
-		{
-			var content = new StringContent(xml, Encoding.UTF8, "application/xml");
-			var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.PostAsync(jenkinsConfig.JenkinsUrl + JobPath(path) + "/createItem?name=" + job, content, ctx));
-			response = await FollowRedirect(response, ctx);
-			response.EnsureSuccessStatusCode();
-		}
-
-		public async Task CreateFolder(string folder, CancellationToken ctx = default(CancellationToken))
-		{
-			await CreateFolder(folder, "", ctx);
-		}
-
-		public async Task CreateFolder(string folder, string path, CancellationToken ctx = default(CancellationToken))
-		{
-			var content = new StringContent("");
-			var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.PostAsync(jenkinsConfig.JenkinsUrl + JobPath(path) + "/createItem?name=" + folder + "&mode=com.cloudbees.hudson.plugins.folder.Folder&Submit=OK", content, ctx));
-			response = await FollowRedirect(response, ctx);
-			response.EnsureSuccessStatusCode();
-		}
-
-		public async Task DeleteFolder(string folder, CancellationToken ctx = default(CancellationToken))
-		{
-			//Yes, delete job/folder are the same. As this might not be transparent we have this endpoint.
-			await DeleteJob(folder, ctx);
-		}
-
-		public async Task QuietDown(string reason = "", CancellationToken ctx = default(CancellationToken))
-		{
-			var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.PostAsync(jenkinsConfig.JenkinsUrl + "/quietDown?reason=" + reason, null, ctx));
-			response = await FollowRedirect(response, ctx);
-			response.EnsureSuccessStatusCode();
-		}
-
-		public async Task CancelQuietDown(CancellationToken ctx = default(CancellationToken))
-		{
-			var response = await GetRetryPolicy().ExecuteAsync(() => httpClient.PostAsync(jenkinsConfig.JenkinsUrl + "/cancelQuietDown", null, ctx));
-			response = await FollowRedirect(response, ctx);
-			response.EnsureSuccessStatusCode();
-		}
-
-		public async Task Restart(CancellationToken ctx = default(CancellationToken))
-		{
-			await GetRetryPolicy().ExecuteAsync(() => httpClient.PostAsync(jenkinsConfig.JenkinsUrl + "/restart", null, ctx));
-		}
-
-		public async Task SafeRestart(CancellationToken ctx = default(CancellationToken))
-		{
-			await GetRetryPolicy().ExecuteAsync(() => httpClient.PostAsync(jenkinsConfig.JenkinsUrl + "/safeRestart", null, ctx));
-		}
-	*/
 
 	public void Dispose() => _httpClient.Dispose();
 }

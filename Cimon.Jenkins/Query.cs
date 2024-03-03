@@ -1,44 +1,24 @@
-﻿using Cimon.Jenkins.Entities.Jobs;
-using Cimon.Jenkins.Entities.Views;
+﻿using System.Net;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Cimon.Jenkins;
 
-public static class Query
+public abstract record Query<T> : BaseRequest
 {
-	public static BaseQuery<bool> Exists<T>(this IQuery<T> query) => new ExistsBaseQuery<T>(query);
-	public record UserInfo(string UserName) : BaseQuery<Entities.Users.UserInfo>
-	{
-		public override string GetPath() => "/user/" + UserName;
+	public virtual bool AddApiJsonSuffix => true;
+
+	public async Task<T?> GetResult(HttpResponseMessage response, CancellationToken ctx) {
+		if (response.StatusCode == HttpStatusCode.NotFound) {
+			return default;
+		}
+		await CheckResponse(response, ctx).ConfigureAwait(false);
+		return await OnGetResult(response, ctx).ConfigureAwait(false);
 	}
 
-	public record Master() : BaseQuery<Entities.Master>
-	{
-		public override string GetPath() => string.Empty;
-	}
-	public record Job(JobLocator JobLocator): BaseQuery<JobInfo>
-	{
-		public override string GetPath() => $"{JobLocator}";
-	}
-	public record BuildInfo(string Build, JobLocator Job) : BaseQuery<Entities.Builds.BuildInfo>
-	{
-		public override string GetPath() => $"{Job}/{Build}";
-	}
-	public record TestsReport(BuildInfo BuildInfo) : BaseQuery<Entities.Builds.TestReport>
-	{
-		public override string GetPath() => $"{BuildInfo.GetPath()}/testReport";
-	}
-	public record BuildConsole(BuildInfo BuildInfo) : StringBaseQuery
-	{
-		public override string GetPath() => BuildInfo.GetPath() + "/consoleText";
-	}
-
-	public record View(string Name) : BaseQuery<ViewInfo>
-	{
-		public override string GetPath() => $"view/{Name}";
-	}
-
-	public record DownloadJobConfig(JobLocator Job) : StringBaseQuery
-	{
-		public override string GetPath() => $"{Job}/config.xml";
+	protected virtual async Task<T?> OnGetResult(HttpResponseMessage response, CancellationToken ctx) {
+		return await response.Content.ReadFromJsonAsync<T>(ctx).ConfigureAwait(false);
 	}
 }

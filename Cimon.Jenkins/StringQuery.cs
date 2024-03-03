@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Cimon.Jenkins;
 
-public abstract record StringBaseQuery : BaseQuery<string>
+public abstract record StringQuery : Query<string>
 {
 	public override bool AddApiJsonSuffix => false;
 	protected override async Task<string?> OnGetResult(HttpResponseMessage response, CancellationToken ctx) => 

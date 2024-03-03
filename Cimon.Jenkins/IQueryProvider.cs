@@ -4,5 +4,5 @@ namespace Cimon.Jenkins;
 
 public interface IQueryProvider
 {
-	IQuery<ViewInfo> ToQuery();
+	Query<ViewInfo> ToQuery();
 }

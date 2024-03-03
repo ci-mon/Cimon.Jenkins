@@ -6,5 +6,5 @@ public record View : IQueryProvider
 {
     public string? Name { get; set; }
     public required Uri Url { get; set; }
-    public IQuery<ViewInfo> ToQuery() => new Query.View(Name!);
+    public Query<ViewInfo> ToQuery() => new Queries.View(Name!);
 }

@@ -11,6 +11,7 @@ public record Master : BaseItem
     public string NodeName { get; set; }
     public int NumExecutors { get; set; }
     public bool QuietingDown { get; set; }
+    public string? QuietDownReason { get; set; }
     public int SlaveAgentPort { get; set; }
     public bool UseCrumbs { get; set; }
     public bool UseSecurity { get; set; }

@@ -7,6 +7,7 @@ namespace Cimon.Jenkins.Entities.Jobs;
 public record JobInfo : Job
 {
     public bool Buildable { get; set; }
+    public bool Disabled { get; set; }
     public bool ConcurrentBuild { get; set; }
     public string Description { get; set; }
     public string DisplayName { get; set; }

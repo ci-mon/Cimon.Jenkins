@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Cimon.Jenkins;
 
-public record ExistsBaseQuery<T>(IQuery<T> SourceQuery) : BaseQuery<bool>
+public record ExistsQuery<T>(Query<T> SourceQuery) : Query<bool>
 {
 	protected override bool CheckStatusCode => false;
 
