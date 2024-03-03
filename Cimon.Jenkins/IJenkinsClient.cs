@@ -6,6 +6,6 @@ namespace Cimon.Jenkins;
 
 public interface IJenkinsClient : IDisposable
 {
-	Task<TResult?> Get<TResult>(Query<TResult> query, CancellationToken token = default);
-	Task Post(Command command, CancellationToken token = default);
+	Task<TResult?> Query<TResult>(Query<TResult> query, CancellationToken token = default);
+	Task Exec(Command command, CancellationToken token = default);
 }

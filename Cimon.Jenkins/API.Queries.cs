@@ -3,7 +3,7 @@ using Cimon.Jenkins.Entities.Views;
 
 namespace Cimon.Jenkins;
 
-public static class Queries
+public static partial class API
 {
 	public static Query<bool> Exists<T>(this Query<T> query) => new ExistsQuery<T>(query);
 	public record UserInfo(string UserName) : Query<Entities.Users.UserInfo>

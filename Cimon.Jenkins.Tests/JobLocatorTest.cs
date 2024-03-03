@@ -9,7 +9,7 @@ public class JobLocatorTest
 {
 
 	[Test]
-	public void ToString() {
+	public void ToString_ShouldReturnExpected() {
 		var locator = JobLocator.Create();
 		locator.ToString().Should().Be(string.Empty);
 		locator = JobLocator.Create("test");

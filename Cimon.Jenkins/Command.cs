@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,11 +17,15 @@ public abstract record Command : BaseRequest
 
 	protected string ToLowerCamelCase(string source) {
 		if (source is not { Length: > 1 }) return source.ToLowerInvariant();
+#if NETSTANDARD2_0
+		return $"{Char.ToLowerInvariant(source[0])}{source.Substring(1)}";
+#else
 		return string.Create(source.Length, source, (span, s) => {
 			span[0] = char.ToLowerInvariant(s[0]);
 			for (int i = 1; i < s.Length; i++) {
 				span[i] = source[i];
 			}
 		});
+#endif
 	}
 }

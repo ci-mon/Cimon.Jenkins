@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace Cimon.Jenkins;
 
-public static class Commands
+public static partial class API
 {
 	public record QuietDown(string? Reason = null) : Command
 	{
@@ -17,8 +17,12 @@ public static class Commands
 		public override string GetPath() => $"/cancelQuietDown";
 	}
 
-	public record Restart : Command;
-	public record SafeRestart : Command;
+	public record Restart : SafeRestart;
+
+	public record SafeRestart : Command
+	{
+		protected override bool CheckStatusCode => false;
+	}
 
 	public record DeleteJob(JobLocator JobLocator) : Command
 	{

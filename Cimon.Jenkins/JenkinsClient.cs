@@ -16,7 +16,9 @@ public class JenkinsClient : IJenkinsClient
 	private readonly JenkinsConfig _jenkinsConfig;
 
 	public JenkinsClient(JenkinsConfig jenkinsConfig, IHttpClientFactory httpClientFactory) {
+#if !NETSTANDARD2_0
 		ArgumentNullException.ThrowIfNull(jenkinsConfig);
+#endif
 
 		_httpClient = httpClientFactory.CreateClient(nameof(JenkinsClient));
 		_httpClient.BaseAddress = jenkinsConfig.JenkinsUrl;
@@ -51,7 +53,7 @@ public class JenkinsClient : IJenkinsClient
 				});
 	}
 
-	public async Task<TResult?> Get<TResult>(Query<TResult> query, CancellationToken token = default) {
+	public async Task<TResult?> Query<TResult>(Query<TResult> query, CancellationToken token = default) {
 		var path = query.GetPath();
 		if (query.AddApiJsonSuffix) {
 			path = $"{path}/api/json";
@@ -61,7 +63,7 @@ public class JenkinsClient : IJenkinsClient
 		return await query.GetResult(response, token).ConfigureAwait(false);
 	}
 
-	public async Task Post(Command command, CancellationToken token = default) {
+	public async Task Exec(Command command, CancellationToken token = default) {
 		var path = command.GetPath();
 		using var request = new HttpRequestMessage(command.Method, path);
 		if (command.Content is { } content) {
