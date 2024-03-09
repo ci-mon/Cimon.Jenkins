@@ -1,5 +1,4 @@
-﻿using Cimon.Jenkins;
-using FluentAssertions;
+﻿using FluentAssertions;
 
 namespace Cimon.Jenkins.Tests;
 

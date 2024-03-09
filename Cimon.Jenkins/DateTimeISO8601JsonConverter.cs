@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Globalization;
-using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace Cimon.Jenkins;
 
-class DateTimeISO8601JsonConverter : JsonConverter<DateTime>
+class DateTimeIso8601JsonConverter : JsonConverter<DateTime>
 {
 	private const string Format = "yyyy-MM-dd HH:mm:ss zzz";
 	public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {

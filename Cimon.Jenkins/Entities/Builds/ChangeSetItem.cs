@@ -9,7 +9,7 @@ public record ChangeSetItem: BaseItem
 {
     public string CommitId { get; set; }
     public string ShortCommitId => CommitId.Length > 8 ? CommitId.Substring(0, 8) : CommitId;
-    [JsonConverter(typeof(DateTimeISO8601JsonConverter))]
+    [JsonConverter(typeof(DateTimeIso8601JsonConverter))]
     public DateTime Date { get; set; }
     public long Timestamp { get; set; }
     [JsonPropertyName("msg")]

@@ -10,7 +10,7 @@ using Polly.Extensions.Http;
 
 namespace Cimon.Jenkins;
 
-public class JenkinsClient : IJenkinsClient
+internal class JenkinsClient : IJenkinsClient
 {
 	private readonly HttpClient _httpClient;
 	private readonly JenkinsConfig _jenkinsConfig;
@@ -34,7 +34,7 @@ public class JenkinsClient : IJenkinsClient
 	public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy() {
 		return HttpPolicyExtensions
 			.HandleTransientHttpError()
-			.OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
+			.OrResult(msg => msg.StatusCode == HttpStatusCode.NotFound)
 			.WaitAndRetryForeverAsync((retryAttempt, context) => {
 					context["Attempt"] = retryAttempt;
 					if (context["Config"] is JenkinsConfig config) {

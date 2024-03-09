@@ -10,7 +10,6 @@ class DynamicItemConverter: JsonConverter<DynamicItem>
 {
 	public override DynamicItem? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
 		var result = new DynamicItem();
-		var jsonElementConverter = (JsonConverter<JsonElement>)options.GetConverter(typeof(JsonElement));
 		while (reader.Read() && reader.TokenType != JsonTokenType.EndObject) {
 			if (reader.TokenType == JsonTokenType.PropertyName) {
 				var propName = reader.GetString();
