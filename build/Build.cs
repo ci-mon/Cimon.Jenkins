@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Linq;
+using Microsoft.Build.Tasks;
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
@@ -18,25 +20,27 @@ class Build : NukeBuild
 	[Parameter] [Secret] readonly string NuGetApiKey;
 	static readonly AbsolutePath PackagesDirectory = RootDirectory / "Packages";
 
-    public static int Main () => Execute<Build>(x => x.Compile);
+	public static int Main () => Execute<Build>(x => x.Compile);
 
-    [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
-    readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
+	[Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
+	readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
 	[Solution]
 	readonly Solution Solution;
 
-    Target Clean => _ => _
-        .Executes(() => {
+	Target Clean => _ => _
+		.Executes(() => {
+			PackagesDirectory.DeleteDirectory();
 			DotNetTasks.DotNetClean();
 		});
 
-    Target Compile => _ => _
-        .Executes(() => {
+	Target Compile => _ => _
+		.Executes(() => {
 			DotNetTasks.DotNetBuild();
 		});
 
 	Target Pack => _ => _
+		.DependsOn(Clean)
 		.Produces(PackagesDirectory / "*.nupkg")
 		.Executes(() => {
 			DotNetTasks.DotNetPack(settings => settings.SetOutputDirectory(PackagesDirectory));

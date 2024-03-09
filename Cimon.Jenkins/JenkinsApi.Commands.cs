@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace Cimon.Jenkins;
 
-public static partial class API
+public static partial class JenkinsApi
 {
 	public record QuietDown(string? Reason = null) : Command
 	{

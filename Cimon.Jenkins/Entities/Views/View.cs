@@ -6,5 +6,5 @@ public record View : IQueryProvider
 {
     public string? Name { get; set; }
     public required Uri Url { get; set; }
-    public Query<ViewInfo> ToQuery() => new API.View(Name!);
+    public Query<ViewInfo> ToQuery() => new JenkinsApi.View(Name!);
 }

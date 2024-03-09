@@ -23,82 +23,82 @@ public class JenkinsClientIntegrationTests
 
 	[Test]
 	public async Task Restart() {
-		await _jenkinsClient.Exec(new API.Restart());
+		await _jenkinsClient.Exec(new JenkinsApi.Restart());
 	}
 
 	[Test]
 	public async Task SafeRestart() {
-		await _jenkinsClient.Exec(new API.SafeRestart());
+		await _jenkinsClient.Exec(new JenkinsApi.SafeRestart());
 	}
 
 	[Test]
 	public async Task QuietDown() {
-		await _jenkinsClient.Exec(new API.CancelQuietDown());
-		var master = await _jenkinsClient.Query(new API.Master());
+		await _jenkinsClient.Exec(new JenkinsApi.CancelQuietDown());
+		var master = await _jenkinsClient.Query(new JenkinsApi.Master());
 		master?.QuietingDown.Should().BeFalse();
-		await _jenkinsClient.Exec(new API.QuietDown("because"));
-		master = await _jenkinsClient.Query(new API.Master());
+		await _jenkinsClient.Exec(new JenkinsApi.QuietDown("because"));
+		master = await _jenkinsClient.Query(new JenkinsApi.Master());
 		master?.QuietingDown.Should().BeTrue();
-		await _jenkinsClient.Exec(new API.CancelQuietDown());
-		master = await _jenkinsClient.Query(new API.Master());
+		await _jenkinsClient.Exec(new JenkinsApi.CancelQuietDown());
+		master = await _jenkinsClient.Query(new JenkinsApi.Master());
 		master?.QuietingDown.Should().BeFalse();
 	}
 
 	[Test]
 	public async Task Folder() {
-		await _jenkinsClient.Exec(new API.CreateFolder("rootFolder"));
-		await _jenkinsClient.Exec(new API.CreateFolder(JobLocator.Create("rootFolder", "innerFolder")));
+		await _jenkinsClient.Exec(new JenkinsApi.CreateFolder("rootFolder"));
+		await _jenkinsClient.Exec(new JenkinsApi.CreateFolder(JobLocator.Create("rootFolder", "innerFolder")));
 		var locator = JobLocator.Create("rootFolder", "innerFolder", "innerSubFolder");
-		await _jenkinsClient.Exec(new API.CreateFolder(locator));
-		var folder = await _jenkinsClient.Query(new API.Job(locator));
+		await _jenkinsClient.Exec(new JenkinsApi.CreateFolder(locator));
+		var folder = await _jenkinsClient.Query(new JenkinsApi.Job(locator));
 		folder.Should().NotBeNull();
-		await _jenkinsClient.Exec(new API.DeleteFolder(locator));
-		folder = await _jenkinsClient.Query(new API.Job(locator));
+		await _jenkinsClient.Exec(new JenkinsApi.DeleteFolder(locator));
+		folder = await _jenkinsClient.Query(new JenkinsApi.Job(locator));
 		folder.Should().BeNull();
-		await _jenkinsClient.Exec(new API.DeleteFolder("rootFolder"));
-		folder = await _jenkinsClient.Query(new API.Job("rootFolder"));
+		await _jenkinsClient.Exec(new JenkinsApi.DeleteFolder("rootFolder"));
+		folder = await _jenkinsClient.Query(new JenkinsApi.Job("rootFolder"));
 		folder.Should().BeNull();
 	}
 
 	[Test]
 	public async Task Commands_DisableJob() {
 		var locator = JobLocator.Create("test proj");
-		await _jenkinsClient.Exec(new API.DisableJob(locator));
-		var job = await _jenkinsClient.Query(new API.Job(locator));
+		await _jenkinsClient.Exec(new JenkinsApi.DisableJob(locator));
+		var job = await _jenkinsClient.Query(new JenkinsApi.Job(locator));
 		job!.Disabled.Should().BeTrue();
-		await _jenkinsClient.Exec(new API.EnableJob(locator));
-		job = await _jenkinsClient.Query(new API.Job(locator));
+		await _jenkinsClient.Exec(new JenkinsApi.EnableJob(locator));
+		job = await _jenkinsClient.Query(new JenkinsApi.Job(locator));
 		job!.Disabled.Should().BeFalse();
 	}
 
 	[Test]
 	public async Task Commands_CopyJob() {
 		var folder = "test_tmp_folder";
-		await _jenkinsClient.Exec(new API.CreateFolder(folder));
+		await _jenkinsClient.Exec(new JenkinsApi.CreateFolder(folder));
 		var sourceJob = JobLocator.Create("test proj");
 		var destJob = JobLocator.Create(folder, "test_tmp");
-		await _jenkinsClient.Exec(new API.CopyJob(destJob, sourceJob));
+		await _jenkinsClient.Exec(new JenkinsApi.CopyJob(destJob, sourceJob));
 		var destJob2 = JobLocator.Create(folder, "test_tmp_2");
-		await _jenkinsClient.Exec(new API.CopyJob(destJob2, destJob));
-		var job = await _jenkinsClient.Query(new API.Job(destJob));
+		await _jenkinsClient.Exec(new JenkinsApi.CopyJob(destJob2, destJob));
+		var job = await _jenkinsClient.Query(new JenkinsApi.Job(destJob));
 		job!.Should().NotBeNull();
-		await _jenkinsClient.Exec(new API.DeleteFolder(folder));
+		await _jenkinsClient.Exec(new JenkinsApi.DeleteFolder(folder));
 	}
 
 	[Test]
 	public async Task Commands_CreateJob() {
 		var folder = "test_tmp_folder_2";
-		await _jenkinsClient.Exec(new API.CreateFolder(folder));
+		await _jenkinsClient.Exec(new JenkinsApi.CreateFolder(folder));
 		var sourceJob = JobLocator.Create("test proj");
 		var destJob = JobLocator.Create(folder, "test_tmp");
-		var sourceJobXml = await _jenkinsClient.Query(new API.DownloadJobConfig(sourceJob));
-		await _jenkinsClient.Exec(new API.CreateJob(destJob, _emptyConfig!));
-		var job = await _jenkinsClient.Query(new API.Job(destJob));
+		var sourceJobXml = await _jenkinsClient.Query(new JenkinsApi.DownloadJobConfig(sourceJob));
+		await _jenkinsClient.Exec(new JenkinsApi.CreateJob(destJob, _emptyConfig!));
+		var job = await _jenkinsClient.Query(new JenkinsApi.Job(destJob));
 		job!.Should().NotBeNull();
-		await _jenkinsClient.Exec(new API.UploadJobConfig(destJob, sourceJobXml!));
-		var jobXml = await _jenkinsClient.Query(new API.DownloadJobConfig(sourceJob));
+		await _jenkinsClient.Exec(new JenkinsApi.UploadJobConfig(destJob, sourceJobXml!));
+		var jobXml = await _jenkinsClient.Query(new JenkinsApi.DownloadJobConfig(sourceJob));
 		jobXml.Should().Be(sourceJobXml);
-		await _jenkinsClient.Exec(new API.DeleteFolder(folder));
+		await _jenkinsClient.Exec(new JenkinsApi.DeleteFolder(folder));
 	}
 
 	private readonly string _emptyConfig = """
@@ -121,13 +121,13 @@ public class JenkinsClientIntegrationTests
 	[Test]
 	public async Task Commands_Build() {
 		var jobLocator = JobLocator.Create("test proj");
-		await _jenkinsClient.Exec(new API.Build(jobLocator));
+		await _jenkinsClient.Exec(new JenkinsApi.Build(jobLocator));
 	}
 
 	[Test]
 	public async Task Commands_Build_Params() {
 		var jobLocator = JobLocator.Create("test1", "master");
-		await _jenkinsClient.Exec(new API.Build(jobLocator) {
+		await _jenkinsClient.Exec(new JenkinsApi.Build(jobLocator) {
 			Parameters = {
 				{"PERSON", "cimon"}
 			}
@@ -137,36 +137,36 @@ public class JenkinsClientIntegrationTests
 	[Test]
 	public async Task Queries() {
 
-		var userInfo = await _jenkinsClient.Query(new API.UserInfo("admin"));
+		var userInfo = await _jenkinsClient.Query(new JenkinsApi.UserInfo("admin"));
 		userInfo.Should().NotBeNull();
 
-		var master = await _jenkinsClient.Query(new API.Master());
+		var master = await _jenkinsClient.Query(new JenkinsApi.Master());
 		master.Should().NotBeNull();
 
 		var view = await _jenkinsClient.Query(master!.Views.First().ToQuery());
 		view.Should().NotBeNull();
 
-		view = await _jenkinsClient.Query(new API.View(master.Views.Last().Name!));
+		view = await _jenkinsClient.Query(new JenkinsApi.View(master.Views.Last().Name!));
 		view.Should().NotBeNull();
 
 		var jobLocator = JobLocator.Create("test1", "master");
-		var job = await _jenkinsClient.Query(new API.Job(jobLocator));
+		var job = await _jenkinsClient.Query(new JenkinsApi.Job(jobLocator));
 		job.Should().NotBeNull();
 
-		var config = await _jenkinsClient.Query(new API.DownloadJobConfig(jobLocator));
+		var config = await _jenkinsClient.Query(new JenkinsApi.DownloadJobConfig(jobLocator));
 		config.Should().NotBeNullOrWhiteSpace();
 
-		(await _jenkinsClient.Query(new API.Job(jobLocator).Exists())).Should().BeTrue();
-		(await _jenkinsClient.Query(new API.Job(JobLocator.Create("thisJobNotExist")).Exists())).Should().BeFalse();
+		(await _jenkinsClient.Query(new JenkinsApi.Job(jobLocator).Exists())).Should().BeTrue();
+		(await _jenkinsClient.Query(new JenkinsApi.Job(JobLocator.Create("thisJobNotExist")).Exists())).Should().BeFalse();
 
-		var buildInfoQuery = new API.BuildInfo("20", jobLocator);
+		var buildInfoQuery = new JenkinsApi.BuildInfo("20", jobLocator);
 		var buildInfo = await _jenkinsClient.Query(buildInfoQuery);
 		buildInfo.Should().NotBeNull();
 
-		var testReport = await _jenkinsClient.Query(new API.TestsReport(buildInfoQuery));
+		var testReport = await _jenkinsClient.Query(new JenkinsApi.TestsReport(buildInfoQuery));
 		testReport.Should().NotBeNull();
 
-		var console = await _jenkinsClient.Query(new API.BuildConsole(buildInfoQuery));
+		var console = await _jenkinsClient.Query(new JenkinsApi.BuildConsole(buildInfoQuery));
 		console.Should().NotBeNullOrEmpty();
 
 	}
