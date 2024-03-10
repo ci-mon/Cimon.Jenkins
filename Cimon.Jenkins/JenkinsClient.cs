@@ -88,7 +88,7 @@ internal class JenkinsClient : IJenkinsClient
 		using var cts = new CancellationTokenSource();
 		context.Add(nameof(CancellationTokenSource), cts);
 		request.SetPolicyExecutionContext(context);
-		var combinedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, ctx);
+		using var combinedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, ctx);
 		try {
 			return await _httpClient.SendAsync(request, combinedCts.Token).ConfigureAwait(false);
 		} catch (OperationCanceledException) when (context.TryGetValue("LastResult", out var r)
