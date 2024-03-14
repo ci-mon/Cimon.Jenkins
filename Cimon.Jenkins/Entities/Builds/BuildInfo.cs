@@ -11,11 +11,11 @@ public record BuildInfo : Build
     public string? DisplayName { get; set; }
     public long Duration { get; set; }
     public long EstimatedDuration { get; set; }
-    public JsonObject? Executor { get; set; }
+    public DynamicItem? Executor { get; set; }
     public string? FullDisplayName { get; set; }
     public required string Id { get; set; }
     public bool KeepLog { get; set; }
-    public long QueuedId { get; set; }
+    public long QueueId { get; set; }
     public long Timestamp { get; set; }
     public string? Result { get; set; }
     public List<ChangeSet>? ChangeSets { get; set; }

@@ -6,6 +6,8 @@ using Cimon.Jenkins.Entities.Builds;
 
 namespace Cimon.Jenkins;
 
+using System.Buffers;
+
 class DynamicItemConverter: JsonConverter<DynamicItem>
 {
 	public override DynamicItem? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
@@ -39,11 +41,18 @@ class DynamicItemConverter: JsonConverter<DynamicItem>
 					value = false;
 				} else if (reader.TokenType == JsonTokenType.Null) {
 					value = null;
-				} else {
+				}  else if (reader.TokenType == JsonTokenType.Number) {
+					value = reader.TryGetInt64(out var res) ? res : reader.GetDecimal();
+				}  else if (reader.TokenType == JsonTokenType.String) {
 					value = reader.GetString();
+				} else {
+					value = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan.ToArray();
 				}
 				result.Props[propName] = value;
 			}
+		}
+		if (string.IsNullOrEmpty(result.Class) && result.Props.Count == 0) {
+			return null;
 		}
 		return result;
 	}
