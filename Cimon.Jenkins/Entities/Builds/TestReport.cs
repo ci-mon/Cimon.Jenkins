@@ -3,6 +3,11 @@ using System.Text.Json;
 
 namespace Cimon.Jenkins.Entities.Builds;
 
+using System;
+using System.Diagnostics;
+using System.Text.Json.Serialization;
+
+[DebuggerDisplay("{Name} {Status} {Duration}")]
 public record TestCase : BaseTestInfo
 {
 	public int Age { get; set; }
@@ -15,31 +20,27 @@ public record TestCase : BaseTestInfo
 	public string Status { get; set; }
 }
 
+[DebuggerDisplay("{Name} {TestActions?.Count}")]
 public record BaseTestInfo
 {
-	
+
 	public List<DynamicItem> TestActions { get; set; }
-	
 	public string Name { get; set; }
 	public string Stderr { get; set; }
 	public string Stdout { get; set; }
 	public float Duration { get; set; }
-	public JsonElement Properties { get; set; }
+	public DynamicItem Properties { get; set; }
 }
 
 public record TestSuite : BaseTestInfo
 {
 	public List<TestCase> Cases { get; set; }
-	
+
 	public string Id { get; set; }
 	public string NodeId { get; set; }
-	public long? Timestamp { get; set; }
-	
-	/*
-
-      "enclosingBlockNames": [],
-      "enclosingBlocks": [],
-	 */
+	public DateTime? Timestamp { get; set; }
+	public string[] EnclosingBlockNames { get; set; }
+	public string[] enclosingBlocks { get; set; }
 }
 
 public record TestReport : BaseItem

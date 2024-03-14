@@ -24,4 +24,7 @@ public record BuildInfo : Build
     public bool InProgress { get; set; }
     public Build NextBuild { get; set; }
     public Build PreviousBuild { get; set; }
+
+	public JenkinsApi.BuildInfo ToQuery() => new(Id, Locator);
+	public JenkinsApi.TestsReport QueryTests() => new JenkinsApi.TestsReport(ToQuery());
 }
