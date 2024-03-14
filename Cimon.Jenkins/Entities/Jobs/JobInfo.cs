@@ -27,7 +27,7 @@ public record JobInfo : Job
     public Build LastUnstableBuild { get; set; }
     public Build LastUnsuccessfulBuild { get; set; }
 
-    public JsonArray Actions { get; set; }
-    public JsonArray Property { get; set; }
+    public List<DynamicItem> Actions { get; set; }
+    public List<DynamicItem> Property { get; set; }
 
 }

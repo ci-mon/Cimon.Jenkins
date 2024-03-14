@@ -20,7 +20,6 @@ public record TestCase : BaseTestInfo
 	public string Status { get; set; }
 }
 
-[DebuggerDisplay("{Name} {TestActions?.Count}")]
 public record BaseTestInfo
 {
 
@@ -30,6 +29,8 @@ public record BaseTestInfo
 	public string Stdout { get; set; }
 	public float Duration { get; set; }
 	public DynamicItem Properties { get; set; }
+
+	public override string ToString() => $"{Name} {Duration} Actions:{TestActions?.Count.ToString() ?? string.Empty}";
 }
 
 public record TestSuite : BaseTestInfo
