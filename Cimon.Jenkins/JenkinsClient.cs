@@ -55,8 +55,8 @@ internal class JenkinsClient : IJenkinsClient
 
 	public async Task<TResult?> Query<TResult>(Query<TResult> query, CancellationToken token = default) {
 		var path = query.GetPath();
-		if (query.AddApiJsonSuffix) {
-			path = $"{path}/api/json";
+		if (!string.IsNullOrWhiteSpace(query.ApiSuffix)) {
+			path = $"{path}{query.ApiSuffix}";
 		}
 		using var request = new HttpRequestMessage(query.Method, path);
 		using var response = await RunWithPolicy(token, request);

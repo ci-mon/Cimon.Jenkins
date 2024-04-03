@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Cimon.Jenkins.Tests;
 
+using Cimon.Jenkins.WorkflowApi;
+
 public class JenkinsClientIntegrationTests
 {
 	private IJenkinsClient _jenkinsClient = null!;

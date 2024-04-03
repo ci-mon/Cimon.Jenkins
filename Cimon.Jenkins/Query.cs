@@ -8,7 +8,7 @@ namespace Cimon.Jenkins;
 
 public abstract record Query<T> : BaseRequest
 {
-	public virtual bool AddApiJsonSuffix => true;
+	public virtual string? ApiSuffix => "/api/json";
 
 	public async Task<T?> GetResult(HttpResponseMessage response, CancellationToken ctx) {
 		if (response.StatusCode == HttpStatusCode.NotFound) {

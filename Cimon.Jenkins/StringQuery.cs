@@ -6,7 +6,7 @@ namespace Cimon.Jenkins;
 
 public abstract record StringQuery : Query<string>
 {
-	public override bool AddApiJsonSuffix => false;
+	public override string? ApiSuffix => null;
 	protected override async Task<string?> OnGetResult(HttpResponseMessage response, CancellationToken ctx) =>
 		await response.Content.ReadAsStringAsync(ctx).ConfigureAwait(false);
 }
