@@ -15,7 +15,7 @@ public class StageFlowNode
 	public long DurationMillis { get; set; }
 	public long PauseDurationMillis { get; set; }
 	public List<string> ParentNodes { get; set; }
-	public Error Error { get; set; }
+	public Error? Error { get; set; }
 	public string ParameterDescription { get; set; }
 
 	public JenkinsWfApi.GetFlowNodeLog GetLogQuery() => new(Links.Log.Href);
